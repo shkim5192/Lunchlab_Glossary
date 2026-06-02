@@ -364,7 +364,7 @@ const SHEET_ID = '1Ut-I8yUmPABUV-UdEO4Z3KN7kIT41c6W0Qv42SZa0AA';
 const CATEGORIES_SHEET = '_categories'; // 카테고리 목록 전용 탭 이름
 
 const csvUrl = (sheet) =>
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}&t=${Date.now()}`;
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(sheet)}&t=${Date.now()}`;
 
 let allTerms = [];
 let activeCat = '전체';
