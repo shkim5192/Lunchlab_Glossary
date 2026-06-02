@@ -1,11 +1,11 @@
 {
-  "name": "사내 용어집",
+  "name": "런치랩 용어집",
   "short_name": "용어집",
   "description": "회사 공식 용어 및 약어 안내",
-  "start_url": "/",
+  "start_url": "/Lunchlab_Glossary/",
   "display": "standalone",
-  "background_color": "#0f0f0f",
-  "theme_color": "#0f0f0f",
+  "background_color": "#ffffff",
+  "theme_color": "#1B4D3E",
   "icons": [
     {
       "src": "icon-192.png",
