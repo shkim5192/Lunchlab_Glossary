@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f0f">
+<title>사내 용어집</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0f0f0f;
+    --bg2:      #161616;
+    --bg3:      #1e1e1e;
+    --border:   #2a2a2a;
+    --border2:  #333;
+    --text:     #e8e6e0;
+    --muted:    #888;
+    --muted2:   #555;
+    --accent:   #c8f06e;
+    --accent2:  #a3d44e;
+    --tag-bg:   rgba(200,240,110,.1);
+    --tag-text: #c8f06e;
+    --radius:   10px;
+    --font:     'Noto Sans KR', sans-serif;
+    --mono:     'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,15,15,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    height: 60px;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: .05em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .logo span { color: var(--muted); }
+
+  /* Search */
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    stroke: var(--muted2);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    pointer-events: none;
+  }
+  #search {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px 8px 36px;
+    font-family: var(--font);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s;
+  }
+  #search::placeholder { color: var(--muted2); }
+  #search:focus { border-color: var(--border2); }
+
+  /* Refresh btn */
+  .btn-refresh {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+    flex-shrink: 0;
+  }
+  .btn-refresh:hover { color: var(--text); border-color: var(--border2); }
+  .btn-refresh svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+  .spin { animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Layout ── */
+  .layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 24px 80px;
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  /* ── Sidebar nav ── */
+  .sidebar {
+    position: sticky;
+    top: 84px;
+  }
+  .sidebar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--muted2);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .cat-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    transition: background .15s, color .15s;
+  }
+  .cat-item:hover { background: var(--bg3); color: var(--text); }
+  .cat-item.active { background: var(--tag-bg); color: var(--accent); }
+  .cat-item .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    background: var(--bg3);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .cat-item.active .count { background: rgba(200,240,110,.15); color: var(--accent2); }
+
+  /* ── Content ── */
+  .content-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .content-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .content-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+  }
+
+  /* Term cards */
+  .term-list { display: flex; flex-direction: column; gap: 1px; }
+
+  .term-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s;
+    margin-bottom: 4px;
+  }
+  .term-card:hover { border-color: var(--border2); }
+  .term-card.open { border-color: #2e2e2e; }
+
+  .term-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .term-ko {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+  .term-en {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    white-space: nowrap;
+  }
+  .term-chevron {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    stroke: var(--muted2);
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: transform .2s;
+  }
+  .term-card.open .term-chevron { transform: rotate(180deg); }
+
+  .term-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+  }
+  .term-card.open .term-body { display: block; }
+
+  .term-def {
+    font-size: 13px;
+    color: #bbb;
+    line-height: 1.8;
+    margin-bottom: 10px;
+  }
+  .term-ex {
+    background: var(--bg3);
+    border-left: 2px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .term-ex-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: .08em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Empty / loading states */
+  .state-box {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--muted2);
+    font-size: 13px;
+  }
+  .state-box .icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+    opacity: .5;
+  }
+
+  /* Error banner */
+  .error-banner {
+    background: rgba(220,60,60,.08);
+    border: 1px solid rgba(220,60,60,.2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #e07070;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .error-banner.show { display: block; }
+
+  /* Highlight match */
+  mark {
+    background: rgba(200,240,110,.2);
+    color: var(--accent);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 600px) {
+    .layout { grid-template-columns: 1fr; gap: 0; padding: 16px 16px 80px; }
+    .sidebar { position: static; }
+    .cat-list { flex-direction: row; flex-wrap: wrap; margin-bottom: 20px; }
+    .logo { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo"><span>//</span> glossary</div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search" placeholder="용어 검색..." autocomplete="off">
+    </div>
+    <button class="btn-refresh" id="btn-refresh" title="새로고침">
+      <svg id="refresh-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      <span id="refresh-label">새로고침</span>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <p class="sidebar-label">카테고리</p>
+    <ul class="cat-list" id="cat-list">
+      <li class="cat-item active" data-cat="전체">
+        전체 <span class="count" id="count-all">0</span>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main content -->
+  <main>
+    <div class="error-banner" id="error-banner"></div>
+    <div class="content-header">
+      <span class="content-title" id="content-title">전체 용어</span>
+      <span class="content-meta" id="content-meta"></span>
+    </div>
+    <div class="term-list" id="term-list">
+      <div class="state-box">
+        <span class="icon">⏳</span>
+        데이터를 불러오는 중입니다…
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 스프레드시트 ID
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SHEET_ID = '2PACX-1vScboMILzTT7nTXZchlB9NkujQ_V_SLdTeF6_VVYzmulaj3MTlRFeNgQENnDnsLLbPHRubMapPJ3zZ5';
+// 카테고리는 '_categories' 시트 탭에서 자동으로 읽어옵니다.
+// 배포 없이 Sheets에서 바로 추가/삭제 가능!
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const CATEGORIES_SHEET = '_categories'; // 카테고리 목록 전용 탭 이름
+
+const csvUrl = (sheet) =>
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}&t=${Date.now()}`;
+
+let allTerms = [];
+let activeCat = '전체';
+let query = '';
+
+// ── CSV 파싱 ──────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  return lines.slice(1).map(line => {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i++; }
+        else inQ = !inQ;
+      } else if (c === ',' && !inQ) {
+        cols.push(cur.trim()); cur = '';
+      } else cur += c;
+    }
+    cols.push(cur.trim());
+    return cols;
+  }).filter(cols => cols[0]);
+}
+
+// ── 1단계: _categories 시트에서 카테고리 목록 읽기 ────────────
+async function fetchCategories() {
+  const res = await fetch(csvUrl(CATEGORIES_SHEET));
+  if (!res.ok) throw new Error(`_categories 시트를 불러오지 못했습니다 (${res.status})`);
+  const text = await res.text();
+  const rows = parseCSV(text);
+  // A열 값만 추출, 빈 행 무시
+  return rows.map(cols => cols[0]).filter(Boolean);
+}
+
+// ── 2단계: 카테고리별 용어 데이터 병렬 로드 ──────────────────
+async function loadAll() {
+  setRefreshing(true);
+  hideError();
+  allTerms = [];
+
+  // Step 1 — 카테고리 목록 동적으로 가져오기
+  let sheets;
+  try {
+    sheets = await fetchCategories();
+    if (!sheets.length) throw new Error('카테고리가 비어 있습니다');
+  } catch (e) {
+    showError(`카테고리 목록 로드 실패: ${e.message} — _categories 시트를 확인해 주세요.`);
+    setRefreshing(false);
+    return;
+  }
+
+  // Step 2 — 각 카테고리 시트 병렬 fetch
+  const results = await Promise.allSettled(
+    sheets.map(async (sheet) => {
+      const res = await fetch(csvUrl(sheet));
+      if (!res.ok) throw new Error(`${sheet} 시트 로드 실패 (${res.status})`);
+      const text = await res.text();
+      const rows = parseCSV(text);
+      return rows.map(cols => ({
+        ko:  cols[0] || '',
+        en:  cols[1] || '',
+        def: cols[2] || '',
+        ex:  cols[3] || '',
+        cat: sheet,
+      })).filter(t => t.ko);
+    })
+  );
+
+  const errors = [];
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') allTerms.push(...r.value);
+    else errors.push(`${sheets[i]}: ${r.reason.message}`);
+  });
+
+  if (errors.length) showError('일부 시트를 불러오지 못했습니다: ' + errors.join(' / '));
+
+  // 현재 선택된 카테고리가 새 목록에 없으면 전체로 초기화
+  const validCats = ['전체', ...sheets];
+  if (!validCats.includes(activeCat)) activeCat = '전체';
+
+  buildSidebar(sheets);
+  render();
+  setRefreshing(false);
+}
+
+// ── 사이드바 ──────────────────────────────────────────────────
+function buildSidebar(sheets) {
+  const list = document.getElementById('cat-list');
+  document.getElementById('count-all').textContent = allTerms.length;
+
+  // 기존 항목(전체 제외) 모두 제거 후 재생성
+  [...list.querySelectorAll('[data-cat]:not([data-cat="전체"])')].forEach(el => el.remove());
+
+  sheets.forEach(sheet => {
+    const cnt = allTerms.filter(t => t.cat === sheet).length;
+    if (cnt === 0) return;
+    const li = document.createElement('li');
+    li.className = 'cat-item' + (activeCat === sheet ? ' active' : '');
+    li.dataset.cat = sheet;
+    li.innerHTML = `${sheet} <span class="count">${cnt}</span>`;
+    li.addEventListener('click', () => setCat(sheet));
+    list.appendChild(li);
+  });
+}
+
+function setCat(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === cat);
+  });
+  render();
+}
+
+// ── 렌더 ──────────────────────────────────────────────────────
+function filtered() {
+  const q = query.toLowerCase();
+  return allTerms.filter(t => {
+    const matchCat = activeCat === '전체' || t.cat === activeCat;
+    const matchQ = !q || [t.ko, t.en, t.def, t.ex].some(s => s.toLowerCase().includes(q));
+    return matchCat && matchQ;
+  });
+}
+
+function hl(text) {
+  if (!query) return escHtml(text);
+  const re = new RegExp(`(${escRe(query)})`, 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
+}
+const escHtml = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const escRe   = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function render() {
+  const items = filtered();
+  const title = activeCat === '전체' ? '전체 용어' : activeCat;
+  document.getElementById('content-title').textContent = title;
+  document.getElementById('content-meta').textContent = `${items.length}개`;
+
+  const list = document.getElementById('term-list');
+  if (!items.length) {
+    list.innerHTML = `<div class="state-box"><span class="icon">🔍</span>검색 결과가 없습니다</div>`;
+    return;
+  }
+
+  list.innerHTML = items.map((t, i) => `
+    <div class="term-card" id="tc-${i}">
+      <div class="term-header" onclick="toggle(${i})">
+        <span class="term-ko">${hl(t.ko)}</span>
+        ${t.en ? `<span class="term-en">${hl(t.en)}</span>` : ''}
+        <svg class="term-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="term-body">
+        ${t.def ? `<p class="term-def">${hl(t.def)}</p>` : ''}
+        ${t.ex  ? `<div class="term-ex"><span class="term-ex-label">사용 예시</span>${hl(t.ex)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // 검색 중이면 전부 펼치기
+  if (query) {
+    items.forEach((_, i) => document.getElementById(`tc-${i}`)?.classList.add('open'));
+  }
+}
+
+function toggle(i) {
+  document.getElementById(`tc-${i}`)?.classList.toggle('open');
+}
+
+// ── 검색 ──────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', e => {
+  query = e.target.value.trim();
+  render();
+});
+
+// ── 새로고침 버튼 ─────────────────────────────────────────────
+document.getElementById('btn-refresh').addEventListener('click', loadAll);
+
+function setRefreshing(on) {
+  const icon  = document.getElementById('refresh-icon');
+  const label = document.getElementById('refresh-label');
+  icon.classList.toggle('spin', on);
+  label.textContent = on ? '로딩 중…' : '새로고침';
+  document.getElementById('btn-refresh').disabled = on;
+}
+
+// ── 에러 표시 ─────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('error-banner');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('error-banner').classList.remove('show');
+}
+
+// ── 사이드바 이벤트: 전체 ─────────────────────────────────────
+document.querySelector('[data-cat="전체"]').addEventListener('click', () => setCat('전체'));
+
+// ── 시작 ──────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
