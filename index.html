@@ -360,11 +360,12 @@ const SHEET_ID = '1Ut-I8yUmPABUV-UdEO4Z3KN7kIT41c6W0Qv42SZa0AA';
 // 카테고리는 '_categories' 시트 탭에서 자동으로 읽어옵니다.
 // 배포 없이 Sheets에서 바로 추가/삭제 가능!
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CATEGORY_GID = '0';
 
-const CATEGORIES_SHEET = '_categories'; // 카테고리 목록 전용 탭 이름
-
-const csvUrl = (sheet) =>
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(sheet)}&t=${Date.now()}`;
+const csvUrl = (sheet, gid) =>
+  gid
+    ? `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}&t=${Date.now()}`
+    : `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(sheet)}&t=${Date.now()}`;
 
 let allTerms = [];
 let activeCat = '전체';
@@ -393,12 +394,11 @@ function parseCSV(text) {
 
 // ── 1단계: _categories 시트에서 카테고리 목록 읽기 ────────────
 async function fetchCategories() {
-  const res = await fetch(csvUrl(CATEGORIES_SHEET));
+  const res = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${CATEGORY_GID}&t=${Date.now()}`);
   if (!res.ok) throw new Error(`_categories 시트를 불러오지 못했습니다 (${res.status})`);
   const text = await res.text();
   const rows = parseCSV(text);
-  // A열 값만 추출, 빈 행 무시
-  return rows.map(cols => cols[0]).filter(Boolean);
+  return rows.map(cols => ({ name: cols[0], gid: cols[1] || '' })).filter(r => r.name);
 }
 
 // ── 2단계: 카테고리별 용어 데이터 병렬 로드 ──────────────────
@@ -407,22 +407,20 @@ async function loadAll() {
   hideError();
   allTerms = [];
 
-  // Step 1 — 카테고리 목록 동적으로 가져오기
-  let sheets;
+  let categories;
   try {
-    sheets = await fetchCategories();
-    if (!sheets.length) throw new Error('카테고리가 비어 있습니다');
+    categories = await fetchCategories();
+    if (!categories.length) throw new Error('카테고리가 비어 있습니다');
   } catch (e) {
-    showError(`카테고리 목록 로드 실패: ${e.message} — _categories 시트를 확인해 주세요.`);
+    showError(`카테고리 목록 로드 실패: ${e.message}`);
     setRefreshing(false);
     return;
   }
 
-  // Step 2 — 각 카테고리 시트 병렬 fetch
   const results = await Promise.allSettled(
-    sheets.map(async (sheet) => {
-      const res = await fetch(csvUrl(sheet));
-      if (!res.ok) throw new Error(`${sheet} 시트 로드 실패 (${res.status})`);
+    categories.map(async ({ name, gid }) => {
+      const res = await fetch(csvUrl(name, gid));
+      if (!res.ok) throw new Error(`${name} 시트 로드 실패 (${res.status})`);
       const text = await res.text();
       const rows = parseCSV(text);
       return rows.map(cols => ({
@@ -430,7 +428,7 @@ async function loadAll() {
         en:  cols[1] || '',
         def: cols[2] || '',
         ex:  cols[3] || '',
-        cat: sheet,
+        cat: name,
       })).filter(t => t.ko);
     })
   );
@@ -438,16 +436,15 @@ async function loadAll() {
   const errors = [];
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') allTerms.push(...r.value);
-    else errors.push(`${sheets[i]}: ${r.reason.message}`);
+    else errors.push(`${categories[i].name}: ${r.reason.message}`);
   });
 
   if (errors.length) showError('일부 시트를 불러오지 못했습니다: ' + errors.join(' / '));
 
-  // 현재 선택된 카테고리가 새 목록에 없으면 전체로 초기화
-  const validCats = ['전체', ...sheets];
+  const validCats = ['전체', ...categories.map(c => c.name)];
   if (!validCats.includes(activeCat)) activeCat = '전체';
 
-  buildSidebar(sheets);
+  buildSidebar(categories.map(c => c.name));
   render();
   setRefreshing(false);
 }
